@@ -7,19 +7,50 @@ var config = {
 }
 
 var helper = {
-	getNews : function(){
-		var walk = function(node){
-			if(node.nodeType === 1 && node.tagName.toLowerCase() === "td" 
-				&& node.classList.contains("title")){
-				// Procesa dependiendo si es 
-				console.log(node.innerHTML);
+	var getNews = function(document){
+		var news = [];
+		var titles = document.querySelectorAll('td.title:not([align="right"])');
+		for(var i = 0; i < titles.length; i++){
+			if(i === 30){
+				break;
 			}
-			var child = node.firstChild;
-			while(child){
-				walk(child);
-				child = child.nextSibling;
-			}
+			anchor = titles[i].querySelector("a");
+			var obj = {
+				title : anchor.textContent,
+				url : anchor.getAttribute("href"),
+				comhead : titles[i].querySelector("span").textContent.slice(2, -2)
+			};
+			news.push(obj);
 		}
+
+		var details = document.querySelectorAll('td.subtext');
+		var timeRegex = /\d+\s\w+\s+ago/;
+		var commentsRegex = /\d+\s+comments/;
+		for(var i = 0; i < news.length; i++){
+			if(details[i].querySelector('span')){
+				news[i].points = details[i].querySelector('span').textContent.split(' ')[0];
+			}else{
+				news[i].points = 0;
+			}
+			if(details[i].querySelector('a[href^="user"]')){
+				news[i].author = details[i].querySelector('a[href^="user"]').textContent;
+			}else{
+				news[i].author = "";
+			}
+			// Get time
+			news[i].time = details[i].innerHTML.match(timeRegex) || "";
+			if(news[i].time !== ""){
+				news[i].time = news[i].time[0];
+			} 
+
+			// Get Comments
+			news[i].commentCount = details[i].innerHTML.match(commentsRegex) || 0;
+			if(news[i].commentCount !== 0){
+				news[i].commentCount = news[i].commentCount[0];
+			}
+
+		}
+		return JSON.stringify(news);
 	}
 }
 
