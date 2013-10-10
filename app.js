@@ -9,16 +9,19 @@ var config = {
 var helper = {
 	getNews : function(document){
 		var news = [];
+
 		var titles = document.querySelectorAll('td.title:not([align="right"])');
 		for(var i = 0; i < titles.length; i++){
 			if(i === 30){
 				break;
 			}
-			anchor = titles[i].querySelector("a");
+			anchor = titles[i].querySelector("a") || "";
+			comhead = titles[i].querySelector("span") || "";
+			console.log(comhead);
 			var obj = {
-				title : anchor.textContent,
-				url : anchor.getAttribute("href"),
-				comhead : titles[i].querySelector("span").textContent.slice(2, -2)
+				title : anchor === "" ? "" : anchor.textContent,
+				url : anchor.getAttribute("href") || "",
+				comhead : comhead === "" ? "" : comhead.textContent.slice(2, -2)
 			};
 			news.push(obj);
 		}
@@ -50,7 +53,7 @@ var helper = {
 			}
 
 		}
-		return JSON.stringify(news);
+		console.log(JSON.stringify(news));
 	}
 }
 
