@@ -57,7 +57,7 @@ var helper = {
 			// Get Comments
 			news[i].commentCount = details[i].innerHTML.match(commentsRegex) || 0;
 			if(news[i].commentCount !== 0){
-				news[i].commentCount = news[i].commentCount[0];
+				news[i].commentCount = news[i].commentCount[0].split(' ')[0];
 			}
 
 		}
