@@ -3,7 +3,7 @@ var jsdom = require("jsdom").jsdom;
 var app = express();
 
 var config = {
-	'host' : 'https://news.ycombinator.com/',
+	host : 'https://news.ycombinator.com/',
 }
 
 var helper = {
@@ -34,11 +34,20 @@ var helper = {
 			}else{
 				news[i].points = 0;
 			}
+			// Get author
 			if(details[i].querySelector('a[href^="user"]')){
 				news[i].author = details[i].querySelector('a[href^="user"]').textContent;
 			}else{
 				news[i].author = "";
 			}
+
+			// Get post id
+			if(details[i].querySelector('a[href^="item"]')){
+				news[i].postUrl = config.host + details[i].querySelector('a[href^="item"]').getAttribute("href");
+			}else{
+				news[i].postUrl = "";
+			}
+
 			// Get time
 			news[i].time = details[i].innerHTML.match(timeRegex) || "";
 			if(news[i].time !== ""){
@@ -68,10 +77,10 @@ app.get('/', function(req, res){
 app.get('/news', function(req, res){
 
 	jsdom.env(config.host, function(err, window){
-	var news = helper.getNews(window.document);
+		var news = helper.getNews(window.document);
 	
-	res.type('application/json');
-	res.send(JSON.stringify(news, null, '\t'));
+		res.type('application/json');
+		res.send(JSON.stringify(news, null, '\t'));
 	});
 	
 });
