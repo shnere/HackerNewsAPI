@@ -17,7 +17,6 @@ var helper = {
 			}
 			anchor = titles[i].querySelector("a") || "";
 			comhead = titles[i].querySelector("span") || "";
-			console.log(comhead);
 			var obj = {
 				title : anchor === "" ? "" : anchor.textContent,
 				url : anchor.getAttribute("href") || "",
@@ -53,7 +52,7 @@ var helper = {
 			}
 
 		}
-		console.log(JSON.stringify(news));
+		return news;
 	}
 }
 
@@ -69,11 +68,12 @@ app.get('/', function(req, res){
 app.get('/news', function(req, res){
 
 	jsdom.env(config.host, function(err, window){
-		var html = window.document.querySelector("html");
-		console.log(html);
+	var news = helper.getNews(window.document);
+	
+	res.type('application/json');
+	res.send(JSON.stringify(news, null, '\t'));
 	});
-
-		
+	
 });
 
 app.listen(3000);
