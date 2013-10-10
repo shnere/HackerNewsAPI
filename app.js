@@ -7,7 +7,7 @@ var config = {
 }
 
 var helper = {
-	var getNews = function(document){
+	getNews : function(document){
 		var news = [];
 		var titles = document.querySelectorAll('td.title:not([align="right"])');
 		for(var i = 0; i < titles.length; i++){
