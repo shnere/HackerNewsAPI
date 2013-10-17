@@ -62,6 +62,19 @@ var helper = {
 
 		}
 		return news;
+	},
+	getNextUrl : function(document){
+		// For some reason document.querySelector('a[href^="/x"]').getAttribute("href"); doesn't work because first elementURL is news2
+		//return document.querySelector('a[href^="/x"]').getAttribute("href");
+		// Fallback: traverse each anchor and look for a node with "More"
+		var anchors = document.querySelectorAll('a');
+		for(var i = 0; i < anchors.length; i++){
+			if(anchors[i].textContent === "More"){
+				console.log("attr: "+anchors[i].outerHTML);
+				return anchors[i].getAttribute("href");
+			}
+		}
+		return "";
 	}
 }
 
@@ -84,5 +97,30 @@ app.get('/news', function(req, res){
 	});
 	
 });
+
+app.get(/^\/news\/(\d+)$/, function(req, res){
+	var pages 	= parseInt(req.params[0]),
+		url 	= '',
+		news 	= [];
+	if(pages === 1){
+		res.redirect('/news');
+		return;
+	}
+	
+	for(var i = 0; i < pages; i++) {
+		jsdom.env(config.host+url, function(err, window){
+			console.log("i: "+i + " url: " + url);
+			
+			//news = helper.getNews(window.document);
+			url = (i === 0 ? 'news2' : helper.getNextUrl(window.document) );
+			//res.type('application/json');
+			//res.send(JSON.stringify(news, null, '\t'));
+		});
+	}
+	
+	
+	
+});
+
 
 app.listen(3000);
