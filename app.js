@@ -1,9 +1,26 @@
-var express = require('express');
-var jsdom = require("jsdom").jsdom;
-var app = express();
+var express = require('express'),
+	app = express(),
+	jsdom = require("jsdom").jsdom,
+	async = require("async"),
+	config = {
+		host : 'https://news.ycombinator.com/',
+	};
 
-var config = {
-	host : 'https://news.ycombinator.com/',
+// Async function, recieves object and loops asynchronously by callling "loopFunction"
+var async = function(o){
+	var i = 0,
+	length = o.length, 
+	url = "";
+
+	var loop = function(url){
+		i++;
+		if(i === o.length){
+			o.callback();
+			return;
+		}
+		o.loopFunction(loop, i, url);
+	}
+	loop("");
 }
 
 var helper = {
@@ -64,14 +81,13 @@ var helper = {
 		return news;
 	},
 	getNextUrl : function(document){
-		// For some reason document.querySelector('a[href^="/x"]').getAttribute("href"); doesn't work because first elementURL is news2
-		//return document.querySelector('a[href^="/x"]').getAttribute("href");
+		// Using document.querySelector('a[href^="/x"]').getAttribute("href"); doesn't work because first elementURL is news2
 		// Fallback: traverse each anchor and look for a node with "More"
 		var anchors = document.querySelectorAll('a');
 		for(var i = 0; i < anchors.length; i++){
 			if(anchors[i].textContent === "More"){
-				console.log("attr: "+anchors[i].outerHTML);
-				return anchors[i].getAttribute("href");
+				//console.log("attr: "+anchors[i].outerHTML);
+				return anchors[i].getAttribute("href").slice(1);
 			}
 		}
 		return "";
@@ -98,6 +114,23 @@ app.get('/news', function(req, res){
 	
 });
 
+app.get(/^\/page\/(\d+)$/, function(req, res){
+	// Get x page
+	var page 	= parseInt(req.params[0]),
+		url 	= '',
+		news 	= [];
+	if(page === 1){
+		res.redirect('/news');
+		return;
+	}
+	
+	/*
+		TODO same as pages (getting next urls) but wihtout concatenating arrays
+	*/
+	
+});
+
+
 app.get(/^\/news\/(\d+)$/, function(req, res){
 	var pages 	= parseInt(req.params[0]),
 		url 	= '',
@@ -107,18 +140,26 @@ app.get(/^\/news\/(\d+)$/, function(req, res){
 		return;
 	}
 	
-	for(var i = 0; i < pages; i++) {
-		jsdom.env(config.host+url, function(err, window){
-			console.log("i: "+i + " url: " + url);
-			
-			//news = helper.getNews(window.document);
-			url = (i === 0 ? 'news2' : helper.getNextUrl(window.document) );
-			//res.type('application/json');
-			//res.send(JSON.stringify(news, null, '\t'));
-		});
-	}
-	
-	
+	// Traverse asynchronously *pages times calling loopFunction, when finished do callback
+	async({
+		length : pages+1,
+		// Get DOM from url and concatenates it to news array
+		loopFunction: function(loop, i, url){
+			console.log("llamo dom: "+config.host+url);
+			jsdom.env(config.host+url, function(err, window){
+				news = news.concat(helper.getNews(window.document));
+				url = (i === 1 ? 'news2' : helper.getNextUrl(window.document) );
+				console.log("Iteration " + i + " url: " + url);
+				loop(url);
+			});
+
+		},
+		callback: function(){
+			// Done
+			res.type('application/json');
+			res.send(JSON.stringify(news, null, '\t'));
+		}
+	});
 	
 });
 
