@@ -114,23 +114,6 @@ app.get('/news', function(req, res){
 	
 });
 
-app.get(/^\/page\/(\d+)$/, function(req, res){
-	// Get x page
-	var page 	= parseInt(req.params[0]),
-		url 	= '',
-		news 	= [];
-	if(page === 1){
-		res.redirect('/news');
-		return;
-	}
-	
-	/*
-		TODO same as pages (getting next urls) but wihtout concatenating arrays
-	*/
-	
-});
-
-
 app.get(/^\/news\/(\d+)$/, function(req, res){
 	var pages 	= parseInt(req.params[0]),
 		url 	= '',
@@ -149,7 +132,7 @@ app.get(/^\/news\/(\d+)$/, function(req, res){
 			jsdom.env(config.host+url, function(err, window){
 				news = news.concat(helper.getNews(window.document));
 				url = (i === 1 ? 'news2' : helper.getNextUrl(window.document) );
-				console.log("Iteration " + i + " url: " + url);
+				console.log("Iteration " + i + " nexturl: " + url);
 				loop(url);
 			});
 
@@ -163,5 +146,41 @@ app.get(/^\/news\/(\d+)$/, function(req, res){
 	
 });
 
+app.get(/^\/page\/(\d+)$/, function(req, res){
+	// Get x page
+	var pages 	= parseInt(req.params[0]),
+		url 	= '',
+		news 	= [];
+	if(pages === 1){
+		res.redirect('/news');
+		return;
+	}
+	
+	/*
+		TODO same as pages (getting next urls) but wihtout concatenating arrays
+	*/
+	async({
+		length : pages+1,
+		// Get DOM from url and concatenates it to news array
+		loopFunction: function(loop, i, url){
+			console.log("llamo dom: "+config.host+url);
+			jsdom.env(config.host+url, function(err, window){
+				if(i === pages){
+					news = helper.getNews(window.document);
+				}
+				url = (i === 1 ? 'news2' : helper.getNextUrl(window.document) );
+				console.log("Iteration " + i + " nexturl: " + url);
+				loop(url);
+			});
+
+		},
+		callback: function(){
+			// Done
+			res.type('application/json');
+			res.send(JSON.stringify(news, null, '\t'));
+		}
+	});
+	
+});
 
 app.listen(3000);
