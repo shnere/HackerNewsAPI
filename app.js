@@ -2,6 +2,7 @@ var express = require('express'),
 	app = express(),
 	jsdom = require("jsdom").jsdom,
 	async = require("async"),
+	port = Number(process.env.PORT || 3000),
 	config = {
 		host : 'https://news.ycombinator.com/',
 	};
@@ -188,5 +189,6 @@ app.get(/^\/page\/(\d+)$/, function(req, res){
 	});
 	
 });
-
-app.listen(3000);
+app.listen(port, function(){
+	console.log("Listening on " + port);
+});
