@@ -156,6 +156,10 @@ app.get(/^\/page\/(\d+)$/, function(req, res){
 	if(pages === 1){
 		res.redirect('/news');
 		return;
+	}else if(pages > 20){
+		res.type('aplication/json');
+		res.send(JSON.stringify([{"error":"current limit of pages is 20"}], null, '\t'));
+		return;
 	}
 	
 	/*
