@@ -1,7 +1,6 @@
 var express = require('express'),
 	app = express(),
 	jsdom = require("jsdom").jsdom,
-	async = require("async"),
 	config = {
 		host : 'https://news.ycombinator.com/',
 	};
