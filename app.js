@@ -25,9 +25,14 @@ var async = function(o){
 
 var helper = {
 	getNews : function(document){
-		var news = [];
-
-		var titles = document.querySelectorAll('td.title:not([align="right"])');
+		var news 			= [],
+			titles 		= document.querySelectorAll('td.title:not([align="right"])'),
+			details		= document.querySelectorAll('td.subtext'),
+			timeRegex 	= /\d+\s\w+\s+ago/,
+			commentsRegex = /\d+\s+comments/,
+			anchor,
+			comhead;
+			
 		for(var i = 0; i < titles.length; i++){
 			if(i === 30){
 				break;
@@ -42,9 +47,6 @@ var helper = {
 			news.push(obj);
 		}
 
-		var details = document.querySelectorAll('td.subtext');
-		var timeRegex = /\d+\s\w+\s+ago/;
-		var commentsRegex = /\d+\s+comments/;
 		for(var i = 0; i < news.length; i++){
 			if(details[i].querySelector('span')){
 				news[i].points = details[i].querySelector('span').textContent.split(' ')[0];
