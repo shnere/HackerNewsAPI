@@ -2,7 +2,7 @@ HackerNewsAPI
 =============
 
 Yet another Hacker news REST API created by Alan Rodriguez.
-Hosted on 
+Hosted on http://hnycapi.herokuapp.com/
 
 Usage
 --------------
